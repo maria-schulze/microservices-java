@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GreetingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="greeting-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="br.edu.atitus.greetingservice.GreetingServiceApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
