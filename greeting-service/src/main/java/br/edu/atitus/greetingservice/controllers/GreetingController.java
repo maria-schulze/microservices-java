@@ -1,13 +1,18 @@
 package br.edu.atitus.greetingservice.controllers;
 
 import br.edu.atitus.greetingservice.configs.GreetingConfig;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/greeting")
 public class GreetingController {
+
+//    @Value("${greeting-service.greeting}")
+//    private String greeting;
+//    @Value("${greeting-service.default-name}")
+//    private String defaultName;
 
     private final GreetingConfig config;
 
@@ -15,23 +20,17 @@ public class GreetingController {
         this.config = config;
     }
 
-    @GetMapping({"", "/"})
-    public String getGreeting(
-            @RequestParam(required = false) String name) {
-        if (name == null || name.isEmpty()) {
-            name = config.getDefaultName();
+
+    @GetMapping({"", "/", "/{namePath}"})
+    public ResponseEntity<String> getGreeting(
+            @RequestParam(required = false) String name,
+            @PathVariable(required = false) String namePath
+    ) {
+        if (name == null) {
+            name = namePath != null ? namePath : config.getDefaultName();
         }
-        return String.format("%s, %s!!!", config.getGreeting(), name);
-    }
 
-    @GetMapping("/{name}")
-    public String getGreetingPath(@PathVariable String name) {
-        return String.format("%s, %s!!!", config.getGreeting(), name);
-    }
-
-    @PostMapping({"", "/"})
-    public String postGreeting(@RequestBody Map<String, String> body) {
-        String name = body.getOrDefault("name", config.getDefaultName());
-        return String.format("%s, %s!!!", config.getGreeting(), name);
+        String retorno = String.format("%s %s!!!", config.getGreeting(), name);
+        return ResponseEntity.ok(retorno);
     }
 }
