@@ -6,9 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="currency-service" />
+        <module name="product-service" />
         <module name="greeting-service" />
         <module name="config-service" />
+        <module name="currency-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -17,6 +18,7 @@
       <module name="config-service" options="-parameters" />
       <module name="currency-service" options="-parameters" />
       <module name="greeting-service" options="-parameters" />
+      <module name="product-service" options="-parameters" />
     </option>
   </component>
 </project>
