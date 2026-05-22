@@ -5,7 +5,10 @@ import br.edu.atitus.productservice.clients.CurrencyResponse;
 import br.edu.atitus.productservice.dtos.ProductDTO;
 import br.edu.atitus.productservice.entities.ProductEntity;
 import br.edu.atitus.productservice.repositories.ProductRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +28,9 @@ public class ProductController {
     private String port;
 
     @GetMapping("/{id}")
+    @Cacheable(value = "products", key = "#id + '-' + #targetCurrency")
+    @CircuitBreaker(name = "currency-service", fallbackMethod = "getProductFallback")
+    @Retry(name = "currency-service")
     public ResponseEntity<ProductDTO> getProduct(
             @PathVariable Long id,
             @RequestParam String targetCurrency) throws Exception {
@@ -61,8 +67,27 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
+    public ResponseEntity<ProductDTO> getProductFallback(
+            Long id, String targetCurrency, Throwable t) {
+        return repository.findById(id).map(entity -> {
+            ProductDTO dto = new ProductDTO(
+                    entity.getId(),
+                    entity.getDescription(),
+                    entity.getBrand(),
+                    entity.getModel(),
+                    entity.getCurrency(),
+                    entity.getPrice(),
+                    entity.getStock(),
+                    entity.getPrice(),
+                    "Product-service running on port: " + port + " - fallback (currency-service unavailable)",
+                    entity.getCurrency()
+            );
+            return ResponseEntity.ok(dto);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException(Exception e){
+    public ResponseEntity<String> handleException(Exception e) {
         String message = e.getMessage().replace("/r/n", "");
         return ResponseEntity.badRequest().body(message);
     }
